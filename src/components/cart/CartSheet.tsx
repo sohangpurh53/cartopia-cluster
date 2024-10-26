@@ -1,5 +1,6 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ShoppingCart } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -54,8 +55,8 @@ export function CartSheet() {
                 <span>Total</span>
                 <span>${cart.total.toFixed(2)}</span>
               </div>
-              <Button className="w-full mt-4">
-                Checkout
+              <Button className="w-full mt-4" asChild>
+                <Link to="/checkout">Checkout</Link>
               </Button>
             </div>
           )}
