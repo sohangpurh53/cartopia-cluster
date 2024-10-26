@@ -1,12 +1,9 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, Search, Menu } from "lucide-react";
+import { Search, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/lib/cart";
+import { CartSheet } from "@/components/cart/CartSheet";
 
 export const Navbar = () => {
-  const cart = useCart();
-  const itemCount = cart.items.length;
-
   return (
     <nav className="border-b">
       <div className="container py-4">
@@ -31,14 +28,7 @@ export const Navbar = () => {
             <Button variant="ghost" size="icon">
               <Search className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-5 w-5" />
-              {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {itemCount}
-                </span>
-              )}
-            </Button>
+            <CartSheet />
             <Button variant="ghost" size="icon" className="md:hidden">
               <Menu className="h-5 w-5" />
             </Button>
