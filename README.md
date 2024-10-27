@@ -1,71 +1,257 @@
-# Welcome to your GPT Engineer project
+# E-commerce Store with React Frontend and Django Backend
 
-## Project info
+## Backend API Documentation
 
-**URL**: https://run.gptengineer.app/projects/126aaf9e-b183-4386-86b9-3f1651d2c556/improve
+### Setup Django Backend
 
-## How can I edit this code?
+1. Create a virtual environment and install dependencies:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install django djangorestframework django-cors-headers
+```
 
-There are several ways of editing your application.
+2. Create a new Django project:
+```bash
+django-admin startproject backend
+cd backend
+python manage.py startapp api
+```
 
-**Use GPT Engineer**
+### API Endpoints
 
-Simply visit the GPT Engineer project at [GPT Engineer](https://gptengineer.app/projects/126aaf9e-b183-4386-86b9-3f1651d2c556/improve) and start prompting.
+#### Products
 
-Changes made via gptengineer.app will be committed automatically to this repo.
+```
+GET /api/products/
+```
+Returns a list of all products.
 
-**Use your preferred IDE**
+Response:
+```json
+[
+  {
+    "id": "1",
+    "name": "Smart Door Lock X1",
+    "slug": "smart-door-lock-x1",
+    "description": "Advanced biometric door lock with fingerprint recognition",
+    "price": 299.99,
+    "category": "Door Locks",
+    "brand": "Qubo",
+    "image": "url_to_image",
+    "additionalImages": ["url1", "url2"],
+    "rating": 4.5,
+    "stock": 10,
+    "features": {
+      "material": "Stainless Steel",
+      "dimensions": "5.9 x 3.1 x 1.2 inches",
+      "technicalSpecs": ["Fingerprint Recognition", "Battery Life: 12 months", "Bluetooth Enabled"]
+    }
+  }
+]
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in the GPT Engineer UI.
+```
+GET /api/products/{slug}/
+```
+Returns details of a specific product.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+#### Categories
 
-Follow these steps:
+```
+GET /api/categories/
+```
+Returns a list of all categories with their subcategories.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Response:
+```json
+[
+  {
+    "id": 1,
+    "name": "Smart Home Devices",
+    "slug": "smart-home-devices",
+    "subcategories": [
+      {
+        "id": 2,
+        "name": "Door Locks",
+        "slug": "door-locks"
+      }
+    ]
+  }
+]
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+#### Cart
 
-# Step 3: Install the necessary dependencies.
-npm i
+```
+POST /api/cart/add/
+```
+Add item to cart.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+Request:
+```json
+{
+  "product_id": "1",
+  "quantity": 1
+}
+```
+
+```
+GET /api/cart/
+```
+Get cart contents.
+
+```
+DELETE /api/cart/{item_id}/
+```
+Remove item from cart.
+
+### Django Models
+
+```python
+# api/models.py
+
+from django.db import models
+
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
+
+class Product(models.Model):
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    brand = models.CharField(max_length=100)
+    image = models.URLField()
+    additional_images = models.JSONField(default=list)
+    rating = models.DecimalField(max_digits=3, decimal_places=2)
+    stock = models.IntegerField()
+    features = models.JSONField()
+    date_added = models.DateTimeField(auto_now_add=True)
+
+class CartItem(models.Model):
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+```
+
+### Configuration
+
+1. Add to `settings.py`:
+```python
+INSTALLED_APPS = [
+    # ...
+    'rest_framework',
+    'corsheaders',
+    'api',
+]
+
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    # ... other middleware
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Your React dev server
+]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ]
+}
+```
+
+2. Update `urls.py`:
+```python
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from api import views
+
+router = DefaultRouter()
+router.register(r'products', views.ProductViewSet)
+router.register(r'categories', views.CategoryViewSet)
+
+urlpatterns = [
+    path('api/', include(router.urls)),
+    path('api/cart/', include('api.urls.cart')),
+]
+```
+
+### Frontend Integration
+
+Update your React application to use the Django backend:
+
+1. Create an API client:
+```typescript
+// src/lib/api.ts
+const API_BASE_URL = 'http://localhost:8000/api';
+
+export const fetchProducts = async () => {
+  const response = await fetch(`${API_BASE_URL}/products/`);
+  return response.json();
+};
+
+export const fetchProduct = async (slug: string) => {
+  const response = await fetch(`${API_BASE_URL}/products/${slug}/`);
+  return response.json();
+};
+```
+
+2. Use React Query for data fetching:
+```typescript
+const { data: products } = useQuery({
+  queryKey: ['products'],
+  queryFn: fetchProducts,
+});
+```
+
+### Development
+
+1. Start Django development server:
+```bash
+python manage.py runserver
+```
+
+2. Start React development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The backend will be available at `http://localhost:8000/api/` and the frontend at `http://localhost:5173`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Authentication
 
-**Use GitHub Codespaces**
+The API uses token-based authentication for protected endpoints. Include the token in your requests:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```typescript
+const headers = {
+  'Authorization': `Token ${token}`,
+  'Content-Type': 'application/json',
+};
+```
 
-## What technologies are used for this project?
+Protected endpoints include:
+- Cart operations (add, remove, update)
+- User profile
+- Order management
 
-This project is built with .
+### Error Handling
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The API returns standard HTTP status codes:
+- 200: Success
+- 201: Created
+- 400: Bad Request
+- 401: Unauthorized
+- 404: Not Found
+- 500: Server Error
 
-## How can I deploy this project?
-
-All GPT Engineer projects can be deployed directly via the GPT Engineer app.
-
-Simply visit your project at [GPT Engineer](https://gptengineer.app/projects/126aaf9e-b183-4386-86b9-3f1651d2c556/improve) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.gptengineer.app/tips-tricks/custom-domain/)
+Error responses include a message field explaining the error:
+```json
+{
+  "message": "Product not found"
+}
+```
