@@ -47,6 +47,7 @@ export const products: Product[] = [
   {
     id: "2",
     name: "Security Camera Pro",
+    slug: "security-camera-pro",
     description: "1080p HD security camera with night vision",
     price: 159.99,
     category: "Cameras",
@@ -65,6 +66,7 @@ export const products: Product[] = [
   {
     id: "3",
     name: "Premium Door Handle",
+    slug: "premium-door-handle",
     description: "Modern minimalist door handle with brushed finish",
     price: 79.99,
     category: "Handles",

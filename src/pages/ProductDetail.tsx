@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { getProductBySlug } from "@/lib/products";
+import { getProductBySlug, getRelatedProducts } from "@/lib/products";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
 import { toast } from "sonner";
@@ -26,7 +26,7 @@ const ProductDetail = () => {
   }
 
   const handleAddToCart = () => {
-    cart.addItem({ ...product, quantity });
+    cart.addItem(product);
     toast.success("Added to cart");
   };
 
