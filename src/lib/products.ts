@@ -15,6 +15,8 @@ export interface Product {
   };
   dateAdded: string;
   popularity: number;
+  slug: string;
+  additionalImages?: string[];
 }
 
 // Mock data with enhanced details
@@ -22,11 +24,16 @@ export const products: Product[] = [
   {
     id: "1",
     name: "Smart Door Lock X1",
+    slug: "smart-door-lock-x1",
     description: "Advanced biometric door lock with fingerprint recognition",
     price: 299.99,
     category: "Door Locks",
     brand: "Qubo",
     image: "https://images.unsplash.com/photo-1558002038-1055907df827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    additionalImages: [
+      "https://images.unsplash.com/photo-1558002038-1055907df827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+      "https://images.unsplash.com/photo-1558002038-1055907df827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    ],
     rating: 4.5,
     stock: 10,
     features: {
@@ -77,11 +84,17 @@ export const products: Product[] = [
 
 export const getProducts = () => products;
 
+export const getProductBySlug = (slug: string) => 
+  products.find(product => product.slug === slug);
+
 export const getProductById = (id: string) => 
   products.find(product => product.id === id);
 
 export const getProductsByCategory = (category: string) =>
   products.filter(product => product.category === category);
+
+export const getRelatedProducts = (category: string) =>
+  products.filter(product => product.category === category).slice(0, 4);
 
 export const searchProducts = (query: string) =>
   products.filter(product => 

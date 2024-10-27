@@ -18,7 +18,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <div className="card group animate-enter">
-      <Link to={`/product/${product.id}`} className="block overflow-hidden">
+      <Link to={`/products/${product.slug}`} className="block overflow-hidden">
         <div className="aspect-square overflow-hidden">
           <img
             src={product.image}
@@ -28,7 +28,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         </div>
       </Link>
       <div className="p-4">
-        <Link to={`/product/${product.id}`}>
+        <Link to={`/products/${product.slug}`}>
           <h3 className="font-medium text-lg mb-2 hover:text-accent">
             {product.name}
           </h3>
